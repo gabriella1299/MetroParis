@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.javadocmd.simplelatlng.LatLng;
 
+import it.polito.tdp.metroparis.model.Connessione;
 import it.polito.tdp.metroparis.model.Fermata;
 import it.polito.tdp.metroparis.model.Linea;
 
@@ -66,6 +67,90 @@ public class MetroDAO {
 		}
 
 		return linee;
+	}
+
+	public boolean fermateCollegate(Fermata f1, Fermata f2) {
+		
+		String sql="SELECT COUNT(*) AS cnt "
+				+ "FROM connessione "
+				+ "WHERE (id_stazP=? AND id_stazA=?) OR "
+				+ "(id_stazP=? AND id_stazA=?)"; 
+				//In realta non serve OR perche' nella tabella sono gia due righe diverse
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, f1.getIdFermata());
+			st.setInt(2, f2.getIdFermata());
+			st.setInt(3, f2.getIdFermata());
+			st.setInt(4, f1.getIdFermata());
+			
+			ResultSet rs = st.executeQuery();
+
+			rs.first(); //mi posiziono sulla prima riga
+						//sono sicuro che ci sia perche' 
+						//e' una query di tipo count -->restituisce sempre il conteggio!
+			
+			int conteggio=rs.getInt("cnt");
+			
+			conn.close();
+			
+			return (conteggio>0); //se il conteggio e' maggiore di zero vuol dire che sono collegate
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore di connessione al Database.");
+		}
+		
+		
+	}
+	
+	public List<Connessione> getAllConnessioni(List<Fermata> fermate){
+		String sql="SELECT id_connessione,id_linea,id_stazP,id_stazA "
+				+ "FROM connessione "
+				+ "WHERE id_stazP>id_stazA ";
+		
+		List<Connessione> risultato=new ArrayList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+
+			
+			while (rs.next()) {	
+				int id_partenza=rs.getInt("id_stazP");
+				Fermata fermata_partenza=null;
+				for(Fermata f:fermate) {
+					if(f.getIdFermata()==id_partenza)
+						fermata_partenza=f;
+				}
+				
+				int id_arrivo=rs.getInt("id_stazA");
+				Fermata fermata_arrivo=null;
+				for(Fermata f:fermate) {
+					if(f.getIdFermata()==id_arrivo)
+						fermata_arrivo=f;
+				}
+				
+				Connessione c = new Connessione(
+						rs.getInt("id_connessione"), 
+						null,//ignoro linea perche non mi serve
+						fermata_partenza,
+						fermata_arrivo);
+				risultato.add(c);
+			}
+
+			st.close();
+			conn.close();
+			
+			return risultato;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore di connessione al Database.");
+		}
+
 	}
 
 
