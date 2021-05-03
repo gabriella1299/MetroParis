@@ -1,11 +1,15 @@
 package it.polito.tdp.metroparis.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 import it.polito.tdp.metroparis.db.MetroDAO;
 
@@ -44,6 +48,59 @@ public class Model {
 		}
 		//System.out.println(this.grafo);
 		System.out.format("Grafo creato con %d vertici e %d archi\n", this.grafo.vertexSet().size(), this.grafo.edgeSet().size()) ;
+		
+		/*
+		Fermata f = null;
+		
+		Set<DefaultEdge> archi=this.grafo.edgesOf(f);
+		for(DefaultEdge e:archi) {
+			/*
+			Fermata f1=this.grafo.getEdgeSource(e);
+			Fermata f2=this.grafo.getEdgeTarget(e);
+			if(f1.equals(f2)) {
+				//f2 e' quello che mi serve
+			}
+			else {
+				//f1 e' quello che mi serve
+			}
+			
+			f1=Graphs.getOppositeVertex(this.grafo, e, f);
+		}
+		List<Fermata> fermateAdiacenti= Graphs.successorListOf(this.grafo, f);
+		*/
+	}
+	
+	//lista di vertici restituiti dall'iteratore usando next()
+	public List<Fermata> fermateRaggiungibili(Fermata partenza){
+		
+		//visita in AMPIEZZA
+		BreadthFirstIterator<Fermata,DefaultEdge> bfv=new BreadthFirstIterator<>(this.grafo,partenza);
+		
+		//visita in PROFONDITA
+		//DepthFirstIterator<Fermata,DefaultEdge> dfv= new DepthFirstIterator<>(this.grafo,partenza);
+		
+		List<Fermata> result=new ArrayList<>();
+		
+		while(bfv.hasNext()) {
+			Fermata f=bfv.next();
+			result.add(f);
+		}
+		//iteratore si e' esaurito--> ho la lista dei vertici adiacenti: result
+		return result;
+		
+	}
+	
+	public Fermata trovaFermata(String nome) {
+		//scandisco collection per trovare un elemento
+		//complessita O(n)
+		//Se dovessi farla piu' volte mi converrebbe avere una mappa per trovare il valore data la chiave
+		//quando costruisco il grafo creo la mappa e poi-->mappa.get(nome)
+		for(Fermata f:this.grafo.vertexSet()) {
+			if(f.getNome().equals(nome)) {
+				return f;
+			}
+		}
+		return null;
 	}
 	
 }
