@@ -22,7 +22,9 @@ public class TestModel {
 		
 		Fermata a =m.trovaFermata("Temple");
 		List<Fermata> percorso=m.trovaCammino(p, a);
+		List<Fermata> percorso2=m.trovaCammino2(p, a);
 		System.out.println(percorso);
+		System.out.println(percorso2);
 	}
 
 }

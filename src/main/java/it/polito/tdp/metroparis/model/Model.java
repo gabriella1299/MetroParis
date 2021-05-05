@@ -177,12 +177,33 @@ public class Model {
 		
 		Fermata f=arrivo;
 		while(predecessore.get(f)!=null) {
-			f=predecessore.get(f);
+			f=predecessore.get(f); //predecessore.getParent(f);
 			result.add(0,f); //per mettere ordine corretto, aggiungo in testa
 		}
 		
 		return result;//contiene tutte le fermate da arrivo a partenza sul cammino minimo (prima di 0,f...dopo l'ordine e' corretto)
 		
+	}
+	
+	// Implementazione di 'trovaCammino' che NON usa il traversal listener ma sfrutta
+	// il metodo getParent presente in BreadthFirstIterator
+	public List<Fermata> trovaCammino2(Fermata partenza, Fermata arrivo) {
+		BreadthFirstIterator<Fermata, DefaultEdge> bfv = 
+				new BreadthFirstIterator<Fermata, DefaultEdge>(this.grafo, partenza) ;
+
+		// fai lavorare l'iteratore per trovare tutti i vertici
+		while(bfv.hasNext())
+			bfv.next() ; // non mi serve il valore
+
+		List<Fermata> result = new LinkedList<>() ;
+		Fermata f = arrivo ;
+		while(f!=null) {
+			result.add(f) ;
+			f = bfv.getParent(f) ;
+		}
+
+		return result ;
+
 	}
 	
 }
